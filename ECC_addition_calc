@@ -1,0 +1,58 @@
+# Inputs
+# given the form y^2 = x^3 + ax + b
+x1, y1 = (2, 7)
+x2, y2 = (5, -6)
+a = 2
+b = 3
+p = 17
+s = None
+
+# Inverse of b in mod a
+def modular_inverse(b, a):
+    mod = a
+    #a = 640 # mod number
+    #b = 49 # number to find inverse
+    q = a // b # quotient
+    r = a % b # remainder
+    s1 = 1
+    s2 = 0
+    s3 = 1
+    t1 = 0
+    t2 = 1
+    t3 = t1 - q*t2
+
+    while (not r==0):
+        a = b
+        b = r
+        q = a // b
+        r = a % b
+        s1 = s2
+        s2 = s3
+        s3 = s1 -q*s2
+        t1 = t2
+        t2 = t3
+        t3 = t1 - q*t2
+    if t2 < 0:
+        t2 += mod
+    return t2
+
+# Calculating S
+if (x1 == x2) and (y1 == y2):
+    d = (2*y1) % p
+    d = modular_inverse(d, p)
+    s = ((3*(x1*x1)+a)* d) % p
+else:
+    d = (x2 - x1) % p
+    d = modular_inverse(d, p)
+    s = ((y2 - y1)*d) % p
+
+x3 = (s*s - x1 - x2) % p
+y3 = (s*(x1 - x3) - y1) % p
+
+x3, y3
+
+ans1 = (y3 * y3) % p
+print("y^2 =", ans1)
+ans2 = ((x3*x3*x3) + a*x3 + b) % p
+print("x^3 + ax + b =", ans2)
+
