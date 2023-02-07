@@ -1,0 +1,136 @@
+# Parameters given
+'''
+k_pub = (p, alpha, beta) = (97, 23, 15)
+k_pr = d = 26
+i = 19
+x  = 11
+'''
+
+# x^e mod n
+def mod_exponent(x, e, n):
+    h = bin(e)
+    h = h[2:]
+
+    y = x
+
+    for idx in range(1, len(h)):
+        y = (y*y)%n
+
+        if h[idx] == "1":
+            y = (y*x)%n
+
+    return y
+
+def modular_inverse(b, a):
+    mod = a
+    #a = 640 # mod number
+    #b = 49 # number to find inverse
+    q = a // b # quotient
+    r = a % b # remainder
+    s1 = 1
+    s2 = 0
+    s3 = 1
+    t1 = 0
+    t2 = 1
+    t3 = t1 - q*t2
+
+    while (not r==0):
+        a = b
+        b = r
+        q = a // b
+        r = a % b
+        s1 = s2
+        s2 = s3
+        s3 = s1 -q*s2
+        t1 = t2
+        t2 = t3
+        t3 = t1 - q*t2
+    if t2 < 0:
+        t2 += mod
+    return t2
+
+# Solving for k_E
+# k_E = K_pubA = alpha^i mod p
+def find_k_E(alpha, i, p):
+    k_E = mod_exponent(alpha, i, p)
+    #print("k_E =",k_E)
+    return k_E
+
+# Solving for y
+def encrypt_with_d(alpha, d, p):
+    beta = mod_exponent(alpha, d, p)
+    print("beta =",beta)
+    # k_M = Beta^i mod p
+    k_M = mod_exponent(beta, i, p)
+    print("k_M =",k_M)
+    # y = x*k_M mod p
+    y = (x*k_M) % p
+    print("y = ", y)
+    return (beta, k_M, y)
+
+# Solving for k_M1
+# k_M = k_E^d mod p
+def find_k_M(k_E, d, p):
+    k_M = mod_exponent(k_E, d, p)
+    print("k_M =",k_M)
+    return k_M
+
+# Solving for X
+def find_x(k_M, p):
+    # x = y*k_M^-1 mod p
+    k_M1 = modular_inverse(k_M, p)
+    x = (y * k_M1) % p
+    print("x =", x)
+    return x
+
+# Use if you know beta
+def elgamal_with_beta(p, alpha, beta, i, x):
+    pass
+
+# Use if you don't know beta
+def elgamal_with_d(p, alpha, d, i, x):
+    pass
+
+# El gamal signature generation
+def elgamal_sig_gen(k_pub, d, x, k_E):
+    p, alpha, beta = k_pub
+    r = (alpha**k_E) % p
+    k_E_inv = modular_inverse(k_E, (p-1))
+    s = ((x - (d*r)) * k_E_inv) % (p-1)
+    return r, s
+
+# Elgamal signature verification
+def verify_elgamal_sig(alpha, beta, x, sig):
+    r, s = sig
+    # This calculation is wrong for t (might be b/c s is wrong)
+    t = ((beta**r) * (r**s)) % p
+    value = (alpha**x) % p
+    print("t = ", t)
+    print("value = ", value)
+
+# Problem 8.14
+x_1 = 21
+k_E1 = 6
+y_1 = 17
+p = 31
+alpha = 3
+beta = 18
+
+for i in range(2, p-1):
+    k_E = (alpha**i) % p
+    if (k_E == k_E1):
+        break
+print("i =", i)
+k_M = (beta**i) % p
+print(k_M)
+y = (x_1*k_M) % p
+print(y)
+
+k_pub = (p, alpha, beta) =(137, 3, 47)
+d = 19
+x = 36
+k_E = 29
+r,s = elgamal_sig_gen(k_pub, d, x, k_E)
+print(r,s)
+verify_elgamal_sig(alpha, beta, x, (r,s))
+
